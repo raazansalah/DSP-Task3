@@ -16,8 +16,7 @@ class ApplicationWindow(Ui_MainWindow):
         self.combobox=[self.image1_box,self.image2_box]
         self.content=self.image1_box.currentText()
         self.actionImport.triggered.connect(self.Importbutton)
-        for i in range(2):
-            self.combobox[i].currentTextChanged.connect(self.select_component)
+        self.image1_box.currentTextChanged.connect(self.select_component)
 
 
     def Importbutton(self):
@@ -36,16 +35,13 @@ class ApplicationWindow(Ui_MainWindow):
 
     def select_component(self,Image_component):
         for i in range(2):
-            selected_component = self.combobox[i].currentIndex()
+            selected_component = self.image1_box.currentIndex()
             display_component = self.image1.Image_component[selected_component]
             dis_imag = np.real(np.fft.ifft2(display_component))
             dis_imag=dis_imag/ np.max(dis_imag)
-            if self.Labels[1].pixmap() is None:
-                plt.imsave('component1.png', abs(dis_imag)) 
-                self.Labels[2].setPixmap(QPixmap('component1.png'))
-            else:
-                plt.imsave('component2.png', abs(dis_imag)) 
-                self.Labels[3].setPixmap(QPixmap('component2.png'))
+            plt.imsave('component.png', abs(dis_imag)) 
+            self.Labels[2].setPixmap(QPixmap('component.png'))
+         
 
 
 
