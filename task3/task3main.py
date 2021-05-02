@@ -47,9 +47,10 @@ class ApplicationWindow(Ui_MainWindow):
 
             dis_imag1 = self.image1.Image_component[selected_component1]
             dis_imag1 = np.real(np.fft.ifft2(dis_imag1))
+            dis_imag1 = abs(dis_imag1)
             dis_imag1=dis_imag1/ np.max(dis_imag1)
-            dis_imag2 = self.image1.Image_component[selected_component2]
             dis_imag2 = np.real(np.fft.ifft2(self.image2.Image_component[selected_component2]))
+            dis_imag2 = abs(dis_imag2)
             dis_imag2=dis_imag2/ np.max(dis_imag2)
             
             plt.imsave('component1.png', abs(dis_imag1)) 
