@@ -17,6 +17,7 @@ class ApplicationWindow(Ui_MainWindow):
         self.content=self.image1_box.currentText()
         self.actionImport.triggered.connect(self.Importbutton)
         self.image1_box.currentTextChanged.connect(self.select_component)
+        self.image2_box.currentTextChanged.connect(self.select_component)
         self.comp2_slider.valueChanged.connect(self.mixer)
 
 
@@ -27,24 +28,35 @@ class ApplicationWindow(Ui_MainWindow):
     
     def Open(self,path):
         if path:
+            self.image = cv2.imread(path)
+            self.image = self.image/np.max(self.image)
+            self.image1 = Image(self.image)
             if self.Labels[0].pixmap() is None : 
-                self.image = cv2.imread(path)
-                self.image = self.image/np.max(self.image)
-                self.image1 = Image(self.image)
-                plt.imsave('input.png' , self.image)
-                self.Labels[0].setPixmap(QPixmap('input.png'))
+                plt.imsave('input1.png',self.image)
+                self.Labels[0].setPixmap(QPixmap('input1.png'))
             else:
-                self.Labels[1].setPixmap(QPixmap(path))
+                plt.imsave('input2.png',self.image)
+                self.Labels[1].setPixmap(QPixmap('input2.png'))
+                self.image2 = Image(self.image)
+
+
 
     def select_component(self,Image_component):
-        for i in range(2):
-            selected_component = self.image1_box.currentIndex()
-            display_component = self.image1.Image_component[selected_component]
-            dis_imag = np.real(np.fft.ifft2(display_component))
-            dis_imag=dis_imag/ np.max(dis_imag)
+            selected_component1 = self.image1_box.currentIndex()
+            selected_component2 = self.image2_box.currentIndex()
+
+            dis_imag1 = self.image1.Image_component[selected_component1]
+            dis_imag1 = np.real(np.fft.ifft2(dis_imag1))
+            dis_imag1=dis_imag1/ np.max(dis_imag1)
+            dis_imag2 = self.image1.Image_component[selected_component2]
+            dis_imag2 = np.real(np.fft.ifft2(self.image2.Image_component[selected_component2]))
+            dis_imag2=dis_imag2/ np.max(dis_imag2)
             
-            plt.imsave('component.png', abs(dis_imag)) 
-            self.Labels[2].setPixmap(QPixmap('component.png'))
+            plt.imsave('component1.png', abs(dis_imag1)) 
+            self.Labels[2].setPixmap(QPixmap('component1.png'))
+                        
+            plt.imsave('component2.png', abs(dis_imag2)) 
+            self.Labels[3].setPixmap(QPixmap('component2.png'))
          
     def mixer(self,Image_component):
         ratio=[0,0]
