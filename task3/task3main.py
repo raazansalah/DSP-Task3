@@ -27,12 +27,14 @@ class ApplicationWindow(Ui_MainWindow):
     
     def Open(self,path):
         if path:
-                if self.Labels[0].pixmap() is None : 
-                    self.Labels[0].setPixmap(QPixmap(path))
-                else:
-                    self.Labels[1].setPixmap(QPixmap(path))
-        self.image = cv2.imread(path)
-        self.image1 = Image(self.image)
+            if self.Labels[0].pixmap() is None : 
+                self.image = cv2.imread(path)
+                self.image = self.image/np.max(self.image)
+                self.image1 = Image(self.image)
+                plt.imsave('input.png' , self.image)
+                self.Labels[0].setPixmap(QPixmap('input.png'))
+            else:
+                self.Labels[1].setPixmap(QPixmap(path))
 
     def select_component(self,Image_component):
         for i in range(2):
