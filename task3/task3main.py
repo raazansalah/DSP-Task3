@@ -17,6 +17,7 @@ class ApplicationWindow(Ui_MainWindow):
         self.content=self.image1_box.currentText()
         self.actionImport.triggered.connect(self.Importbutton)
         self.image1_box.currentTextChanged.connect(self.select_component)
+        self.comp2_slider.valueChanged.connect(self.mixer)
 
 
     def Importbutton(self):
@@ -39,11 +40,24 @@ class ApplicationWindow(Ui_MainWindow):
             display_component = self.image1.Image_component[selected_component]
             dis_imag = np.real(np.fft.ifft2(display_component))
             dis_imag=dis_imag/ np.max(dis_imag)
+            
             plt.imsave('component.png', abs(dis_imag)) 
             self.Labels[2].setPixmap(QPixmap('component.png'))
          
-
-
+    def mixer(self,Image_component):
+        ratio=[0,0]
+        sliders=[self.comp1_slider,self.comp2_slider]
+        for i in range(2):
+            ratio[i]= (sliders[i].value())/100
+        print(ratio)  
+    
+        mixmag=(self.image1.Image_component[0]) 
+        mixphase= (self.image1.Image_component[1]) 
+        combine= np.multiply(mixphase , mixmag)
+        imgmix= np.real(np.fft.ifft2(combine))
+        imgmix= imgmix/ np.max(imgmix)
+        plt.imsave('mixed.png',abs( imgmix) )
+        self.output1_img.setPixmap(QPixmap('mixed.png'))
 
 class Image():
     def __init__(self,image=[]):
