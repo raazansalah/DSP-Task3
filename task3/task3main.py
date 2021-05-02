@@ -78,47 +78,116 @@ class ApplicationWindow(Ui_MainWindow):
         print(ratio)
         mixing=[self.image1,self.image2]
         combo2=[['Phase','Uniphase'],['Magnitude','Unimag'],['Imaginary'],['Real'],['Phase','UniPhase'],['Magnitude','Unimag']]
-        
+        ## update combobox2
+        for i in range(6):
+            if self.comp1_box2.currentIndex()==i:
+                self.comp2_box2.clear()
+                self.comp2_box2.addItems(combo2[i])
+
+                #print(self.comp2_box2.count())
+        ## choose mixed images
         for i in range(2):
+            global mix11,mix22,mix21,mix12
             if self.comp1_box1.currentIndex()==i:
-                mix1=mixing[i]
-            for i in range(6):
-                if self.comp1_box2.currentIndex()==i:
-                    global comp1
-                    comp1=mix1.Image_component[i]
-                    
-                    self.comp2_box2.clear()
-                    self.comp2_box2.addItems(combo2[i])
-                for i in range( 2):
-                    if self.comp1_box1.currentIndex()==i:
-                        mix2=mixing[i]
-                    for i in range(self.comp2_box2.count()):
-                        if self.comp2_box2.currentIndex()==i:
-                            global comp2
-                            comp2 = mix2.Image_component[i]
-        for i in range(4):
-            listofcomp=['Magnitude','Phase','Unimag','UniPhase']
-            if self.comp1_box2.currentText() in listofcomp:
-                resmix1= (comp1*ratio[0]) + ((mix2.Image_component[self.comp2_box2.currentIndex()])*(1-ratio[0]))
-                resmix2= (comp2*ratio[1]) + ((mix1.Image_component[self.comp1_box2.currentIndex()])*(1-ratio[1]))
-            else  :
-                resmix1= (comp1*ratio[0]) + ((mix2.Image_component[self.comp2_box2.currentIndex()])*(1-ratio[0]))
-                resmix2= (comp2*ratio[1]) + ((mix1.Image_component[self.comp1_box2.currentIndex()])*(1-ratio[1]))  
-            combine= np.multiply(resmix1 , resmix2)
-            imgmix= np.real(np.fft.ifft2(combine))
-            imgmix= imgmix/ np.max(imgmix)
-            plt.imsave('mixed.png',abs( imgmix) )
-            self.output1_img.setPixmap(QPixmap('mixed.png'))
-                                
+                mix11= mixing[i]
+                mix22 = mixing[i]
+                
+            if self.comp2_box1.currentIndex()==i:
+                mix21=mixing[i]
+                mix12=mixing[i]
+                
+        ##choose mixed components
+        for i in range(6):
+            global m1 ,m2 ,m3,m4,resmix1,resmix2
+            if self.comp1_box2.currentIndex()==i:
+                m1= mix11.Image_component[i]
+                m2= mix12.Image_component[i]
+                # print(m1[0][0][0])
+                # print(m2[0][0][0])
+              
+        for i in range(self.comp2_box2.count()):
+            
+            if self.comp2_box2.currentIndex()==i:
+                m3= mix21.Image_component[i]
+                m4= mix22.Image_component[i]
+                    # print(m3[0][0][0])
+                    # print(m4[0][0][0])
+
+                
+                resmix1= (m1*ratio[0]) + (m2 *(1-ratio[0]))
+                resmix2= (m3*ratio[1]) + (m4 *(1-ratio[1])) 
+                combine= np.multiply(resmix1 , resmix2)
+                imgmix= np.real(np.fft.ifft2(combine))
+                imgmix= imgmix/ np.max(imgmix)
+                plt.imsave('mixed.png',abs( imgmix) )
+                self.output1_img.setPixmap(QPixmap('mixed.png')) 
+
+            # resmix1= (m1*ratio[0]) + (m2 *(1-ratio[0]))
+            # resmix2= (m3*ratio[1]) + (m4 *(1-ratio[1]))   
+             
+            # combine= np.multiply(resmix1 , resmix2)
+            # imgmix= np.real(np.fft.ifft2(combine))
+            # imgmix= imgmix/ np.max(imgmix)
+            # plt.imsave('mixed.png',abs( imgmix) )
+            # self.output1_img.setPixmap(QPixmap('mixed.png'))      
+        #mixing 
+        # for i in range(4):
+        #     listofcomp=['Magnitude','Phase','Unimag','UniPhase']
+        #     if self.comp1_box2.currentText() in listofcomp:
+        #         combine= np.multiply(resmix1 , resmix2)
+        #         imgmix= np.real(np.fft.ifft2(combine))
+        #         imgmix= imgmix/ np.max(imgmix)
+        #         plt.imsave('mixed.png',abs( imgmix) )
+        #         self.output1_img.setPixmap(QPixmap('mixed.png'))
+            
+               
+                
+                
+
+                                      
+        # for i in range(2):
+        #     sss=[1,0]
+        #     if self.comp1_box1.currentIndex()==i:
+        #         mix1=mixing[i]
+        #         mix12=mixing[sss[i]]
+        #     for i in range(6):
+        #         if self.comp1_box2.currentIndex()==i:
+        #             global comp11,comp12
+        #             comp11=mix1.Image_component[i]
+        #             comp12=mix12.Image_component[i]
+        #             self.comp2_box2.clear()
+        #             self.comp2_box2.addItems(combo2[i])
+        #     for i in range( 2):
+        #         if self.comp2_box1.currentIndex()==i:
+        #             mix2=mixing[i]
+        #             mix22=mixing[sss[i]]
+        #             for i in range(self.comp2_box2.count()):
+                        
+        #                 if self.comp2_box2.currentIndex()==i:
+                            
+        #                     global comp21,comp22
+        #                     comp21 = mix2.Image_component[i]
+        #                     comp22=mix22.Image_component[i]
+                            
+        
+            
 
 
-        # mixmag=((self.image1.Image_component[0]) * ratio[0]) +((1-ratio[0]) *(self.image2.Image_component[0]) )
-        # mixphase= ((self.image2.Image_component[1]) * ratio[1]) +((1-ratio[1]) *(self.image1.Image_component[1]) )
-        # combine= np.multiply(mixphase , mixmag)
-        # imgmix= np.real(np.fft.ifft2(combine))
-        # imgmix= imgmix/ np.max(imgmix)
-        # plt.imsave('mixed.png',abs( imgmix) )
-        # self.output1_img.setPixmap(QPixmap('mixed.png'))
+        #     combine= np.multiply(resmix1 , resmix2)
+        #     imgmix= np.real(np.fft.ifft2(combine))
+        #     imgmix= imgmix/ np.max(imgmix)
+        #     plt.imsave('mixed.png',abs( imgmix) )
+        #     self.output1_img.setPixmap(QPixmap('mixed.png'))
+                                 
+
+
+        """ mixmag=((self.image1.Image_component[0]) * ratio[0]) +((1-ratio[0]) *(self.image2.Image_component[0]) )
+        mixphase= ((self.image2.Image_component[1]) * ratio[1]) +((1-ratio[1]) *(self.image1.Image_component[1]) )
+        combine= np.multiply(mixphase , mixmag)
+        imgmix= np.real(np.fft.ifft2(combine))
+        imgmix= imgmix/ np.max(imgmix)
+        plt.imsave('mixed.png',abs( imgmix) )
+        self.output1_img.setPixmap(QPixmap('mixed.png')) """
 
 class Image():
     def __init__(self,image=[]):
