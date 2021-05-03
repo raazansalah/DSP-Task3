@@ -20,6 +20,10 @@ class ApplicationWindow(Ui_MainWindow):
         self.image2_box.currentTextChanged.connect(self.select_component)
         self.comp2_slider.valueChanged.connect(self.mixer)
         self.comp1_slider.valueChanged.connect(self.mixer)
+        self.comp1_box1.currentTextChanged.connect(self.mixer)
+        self.comp1_box2.currentTextChanged.connect(self.mixer)
+        self.comp2_box1.currentTextChanged.connect(self.mixer)
+        #self.comp2_box2.currentTextChanged.connect(self.mixer)
 
     
     def Importbutton(self):
@@ -75,9 +79,17 @@ class ApplicationWindow(Ui_MainWindow):
         sliders=[self.comp1_slider,self.comp2_slider]
         for i in range(2):
             ratio[i]= (sliders[i].value())/100
-        print(ratio)
+        #print(ratio)
         mixing=[self.image1,self.image2]
-        combo2=[['Phase','Uniphase'],['Magnitude','Unimag'],['Imaginary'],['Real'],['Phase','UniPhase'],['Magnitude','Unimag']]
+        combo2=[['Phase','UniPhase'],['Magnitude','UniMagnitude'],['Imaginary'],['Real'],['Phase','UniPhase'],['Magnitude','UniMagnitude']]
+        lookup= {
+            'Magnitude' : 0,
+            'Phase':1,
+            'Real':2,
+            'Imaginary':3,
+            'UniMagnitude':4,
+            'UniPhase':5    
+            }
         ## update combobox2
         for i in range(6):
             if self.comp1_box2.currentIndex()==i:
@@ -107,77 +119,35 @@ class ApplicationWindow(Ui_MainWindow):
               
         for i in range(self.comp2_box2.count()):
             
-            if self.comp2_box2.currentIndex()==i:
-                m3= mix21.Image_component[i]
-                m4= mix22.Image_component[i]
-                    # print(m3[0][0][0])
-                    # print(m4[0][0][0])
 
+            if self.comp2_box2.currentIndex()==i:
+                global x
+                x=lookup.get(self.comp2_box2.currentText())
                 
+                m3= mix21.Image_component[x]
+                m4= mix22.Image_component[x]
+                    
                 resmix1= (m1*ratio[0]) + (m2 *(1-ratio[0]))
                 resmix2= (m3*ratio[1]) + (m4 *(1-ratio[1])) 
+
+            xx=[0,1,4,5]
+            if x in xx:
+                
                 combine= np.multiply(resmix1 , resmix2)
-                imgmix= np.real(np.fft.ifft2(combine))
-                imgmix= imgmix/ np.max(imgmix)
-                plt.imsave('mixed.png',abs( imgmix) )
-                self.output1_img.setPixmap(QPixmap('mixed.png')) 
+            else:
+                combine= np.add(resmix1 , resmix2)    
 
-            # resmix1= (m1*ratio[0]) + (m2 *(1-ratio[0]))
-            # resmix2= (m3*ratio[1]) + (m4 *(1-ratio[1]))   
-             
-            # combine= np.multiply(resmix1 , resmix2)
-            # imgmix= np.real(np.fft.ifft2(combine))
-            # imgmix= imgmix/ np.max(imgmix)
-            # plt.imsave('mixed.png',abs( imgmix) )
-            # self.output1_img.setPixmap(QPixmap('mixed.png'))      
-        #mixing 
-        # for i in range(4):
-        #     listofcomp=['Magnitude','Phase','Unimag','UniPhase']
-        #     if self.comp1_box2.currentText() in listofcomp:
-        #         combine= np.multiply(resmix1 , resmix2)
-        #         imgmix= np.real(np.fft.ifft2(combine))
-        #         imgmix= imgmix/ np.max(imgmix)
-        #         plt.imsave('mixed.png',abs( imgmix) )
-        #         self.output1_img.setPixmap(QPixmap('mixed.png'))
+            imgmix= np.real(np.fft.ifft2(combine))
+            imgmix= imgmix/ np.max(imgmix)
             
-               
-                
-                
-
-                                      
-        # for i in range(2):
-        #     sss=[1,0]
-        #     if self.comp1_box1.currentIndex()==i:
-        #         mix1=mixing[i]
-        #         mix12=mixing[sss[i]]
-        #     for i in range(6):
-        #         if self.comp1_box2.currentIndex()==i:
-        #             global comp11,comp12
-        #             comp11=mix1.Image_component[i]
-        #             comp12=mix12.Image_component[i]
-        #             self.comp2_box2.clear()
-        #             self.comp2_box2.addItems(combo2[i])
-        #     for i in range( 2):
-        #         if self.comp2_box1.currentIndex()==i:
-        #             mix2=mixing[i]
-        #             mix22=mixing[sss[i]]
-        #             for i in range(self.comp2_box2.count()):
-                        
-        #                 if self.comp2_box2.currentIndex()==i:
-                            
-        #                     global comp21,comp22
-        #                     comp21 = mix2.Image_component[i]
-        #                     comp22=mix22.Image_component[i]
-                            
-        
+            out=[self.output1_img , self.output2_img]
+            for i in range(2):
+                if self.mixer_box.currentIndex()==i:
+                    plt.imsave('mixed.png',abs( imgmix) )
+                    out[i].setPixmap(QPixmap('mixed.png')) 
             
 
 
-        #     combine= np.multiply(resmix1 , resmix2)
-        #     imgmix= np.real(np.fft.ifft2(combine))
-        #     imgmix= imgmix/ np.max(imgmix)
-        #     plt.imsave('mixed.png',abs( imgmix) )
-        #     self.output1_img.setPixmap(QPixmap('mixed.png'))
                                  
 
 
