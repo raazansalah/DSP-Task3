@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import fftpack,fft
 import cv2
+from numpy.fft import fft2, ifft2, fftfreq, fftshift
 
 
 class ApplicationWindow(Ui_MainWindow):
@@ -36,15 +37,15 @@ class ApplicationWindow(Ui_MainWindow):
     def Open(self,path):
         
         if self.Labels[0].pixmap() is None :
-            self.image = cv2.imread(path)
-            self.image = self.image/np.max(self.image)
+            self.image = cv2.imread(path,flags=cv2.IMREAD_GRAYSCALE)
+            #self.image = self.image/np.max(self.image)
             self.image1 = Image(self.image)
             if self.Labels[0].pixmap() is None : 
                 plt.imsave('input1.png',self.image)
                 self.Labels[0].setPixmap(QPixmap('input1.png'))
         else:
-            self.image = cv2.imread(path)
-            self.image = self.image/np.max(self.image)
+            self.image = cv2.imread(path,flags=cv2.IMREAD_GRAYSCALE)
+            #self.image = self.image/np.max(self.image)
             self.image2 = Image(self.image)
             if self.Labels[1].pixmap() is None : 
                 plt.imsave('input2.png',self.image)
@@ -60,12 +61,12 @@ class ApplicationWindow(Ui_MainWindow):
             for i in range(2):
                 for k in range(1,5):
                     if selectors[i].currentIndex()==k:
-                        sel_comp[i]= images[i].Image_component[k-1]
-                        sel_comp[i]= np.real(np.fft.ifft2(sel_comp[i]))
-                        sel_comp[i]= abs(sel_comp[i])
-                        sel_comp[i]= sel_comp[i]/ np.max(sel_comp[i])
+                        sel_comp[i]= images[i].Image_component2[k-1]
+                        #sel_comp[i]= np.real(np.fft.ifft2(sel_comp[i]))
+                        #sel_comp[i]= abs(sel_comp[i])
+                        #sel_comp[i]= sel_comp[i]/ np.max(sel_comp[i])
                         name= 'component' + str(i) + '.png'
-                        plt.imsave( name, abs(sel_comp[i])) 
+                        plt.imsave( name, sel_comp[i]) 
                         self.Labels[i+2].setPixmap(QPixmap( name))
                         break
 
@@ -88,8 +89,7 @@ class ApplicationWindow(Ui_MainWindow):
                         
             plt.imsave('component2.png', abs(sel_comp[1])) 
             self.Labels[3].setPixmap(QPixmap('component2.png')) """
-            print(self.image2.Image_component[0][1][3])
-            print(self.image1.Image_component[0][1][3])
+ 
 
     def mixer(self,Image_component):
         
@@ -156,27 +156,30 @@ class ApplicationWindow(Ui_MainWindow):
                 combine= np.add(resmix1 , resmix2)    
 
             imgmix= np.real(np.fft.ifft2(combine))
-            imgmix= imgmix/ np.max(imgmix)
+            #imgmix= imgmix/ np.max(imgmix)
             
             out=[self.output1_img , self.output2_img]
             for i in range(2):
                 if self.mixer_box.currentIndex()==i:
-                    plt.imsave('mixed.png',abs( imgmix) )
+                    plt.imsave('mixed.png', imgmix )
                     out[i].setPixmap(QPixmap('mixed.png')) 
         
 
 class Image():
     def __init__(self,image=[]):
          self.image = image
-         self.im_fft = fftpack.fft2(self.image) 
+         self.im_fft = fft2(self.image) 
+         self.im_fft_shifted=np.fft.fftshift(self.im_fft)
          self.magnitude= np.abs(self.im_fft)
-         self.phase =  np.exp(1j*np.angle(self.im_fft))
+         self.magnitude_spectrum=20*np.log(np.abs(self.im_fft_shifted))
+         self.phase =  np.angle(self.im_fft)
          self.real = np.real(self.im_fft)
-         self.imaginary = 1j*np.imag(self.im_fft)
+         self.real_spectrum=20*np.log(np.real(self.im_fft_shifted))
+         self.imaginary = np.imag(self.im_fft)
          self.unimag = np.ones(np.shape(self.magnitude))
          self.uniphase = np.zeros(np.shape(self.phase))
          self.Image_component=[self.magnitude,self.phase ,self.real,self.imaginary,self.unimag,self.uniphase]
-
+         self.Image_component2=[self.magnitude_spectrum,self.phase,self.real_spectrum,self.imaginary]
 
     
 
