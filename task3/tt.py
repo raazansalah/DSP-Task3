@@ -1,5 +1,4 @@
-a_dictionary = {}
-for number in range(1,4):
-    a_dictionary["key%s" %number] = "abc"
-
-print(a_dictionary)
+for i in range(1 , 6):
+    x=[]
+    x[i]=i
+print(x)    

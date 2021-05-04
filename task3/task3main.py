@@ -23,9 +23,9 @@ class ApplicationWindow(Ui_MainWindow):
         self.comp1_box1.currentTextChanged.connect(self.mixer)
         self.comp1_box2.currentTextChanged.connect(self.mixer)
         self.comp2_box1.currentTextChanged.connect(self.mixer)
-        #self.comp2_box2.currentTextChanged.connect(self.mixer)
+        self.comp2_box2.currentTextChanged.connect(self.mixer)
 
-    
+
     def Importbutton(self):
         filename = QFileDialog.getOpenFileName(None, 'Load Signal', "*.png;;")
         self.path = filename[0]
@@ -53,8 +53,26 @@ class ApplicationWindow(Ui_MainWindow):
 
 
     def select_component(self,Image_component):
-            
-            selected_component1 = self.image1_box.currentIndex()
+            selectors=[self.image1_box,self.image2_box]
+            images=[self.image1 ,self.image2]
+            sel_comp=[self.image1 , self.image2]
+            show=[self.image1_after , self.image2_after]
+            for i in range(2):
+                for k in range(1,5):
+                    if selectors[i].currentIndex()==k:
+                        sel_comp[i]= images[i].Image_component[k-1]
+                        sel_comp[i]= np.real(np.fft.ifft2(sel_comp[i]))
+                        sel_comp[i]= abs(sel_comp[i])
+                        sel_comp[i]= sel_comp[i]/ np.max(sel_comp[i])
+                        name= 'component' + str(i) + '.png'
+                        plt.imsave( name, abs(sel_comp[i])) 
+                        self.Labels[i+2].setPixmap(QPixmap( name))
+                        break
+
+                        
+
+
+            """ selected_component1 = self.image1_box.currentIndex()
             selected_component2 = self.image2_box.currentIndex()
 
             dis_imag1 = self.image1.Image_component[selected_component1]
@@ -63,13 +81,13 @@ class ApplicationWindow(Ui_MainWindow):
             dis_imag1=dis_imag1/ np.max(dis_imag1)
             dis_imag2 = np.real(np.fft.ifft2(self.image2.Image_component[selected_component2]))
             dis_imag2 = abs(dis_imag2)
-            dis_imag2=dis_imag2/ np.max(dis_imag2)
+            dis_imag2=dis_imag2/ np.max(dis_imag2) """
             
-            plt.imsave('component1.png', abs(dis_imag1)) 
+            """ plt.imsave('component1.png', abs(sel_comp[0])) 
             self.Labels[2].setPixmap(QPixmap('component1.png'))
                         
-            plt.imsave('component2.png', abs(dis_imag2)) 
-            self.Labels[3].setPixmap(QPixmap('component2.png'))
+            plt.imsave('component2.png', abs(sel_comp[1])) 
+            self.Labels[3].setPixmap(QPixmap('component2.png')) """
             print(self.image2.Image_component[0][1][3])
             print(self.image1.Image_component[0][1][3])
 
@@ -91,12 +109,12 @@ class ApplicationWindow(Ui_MainWindow):
             'UniPhase':5    
             }
         ## update combobox2
-        for i in range(6):
+        """ for i in range(6):
             if self.comp1_box2.currentIndex()==i:
                 self.comp2_box2.clear()
                 self.comp2_box2.addItems(combo2[i])
 
-                #print(self.comp2_box2.count())
+                #print(self.comp2_box2.count()) """
         ## choose mixed images
         for i in range(2):
             global mix11,mix22,mix21,mix12
@@ -145,19 +163,7 @@ class ApplicationWindow(Ui_MainWindow):
                 if self.mixer_box.currentIndex()==i:
                     plt.imsave('mixed.png',abs( imgmix) )
                     out[i].setPixmap(QPixmap('mixed.png')) 
-            
-
-
-                                 
-
-
-        """ mixmag=((self.image1.Image_component[0]) * ratio[0]) +((1-ratio[0]) *(self.image2.Image_component[0]) )
-        mixphase= ((self.image2.Image_component[1]) * ratio[1]) +((1-ratio[1]) *(self.image1.Image_component[1]) )
-        combine= np.multiply(mixphase , mixmag)
-        imgmix= np.real(np.fft.ifft2(combine))
-        imgmix= imgmix/ np.max(imgmix)
-        plt.imsave('mixed.png',abs( imgmix) )
-        self.output1_img.setPixmap(QPixmap('mixed.png')) """
+        
 
 class Image():
     def __init__(self,image=[]):
