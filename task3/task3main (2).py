@@ -8,7 +8,17 @@ import numpy as np
 from scipy import fftpack,fft
 import cv2
 from numpy.fft import fft2, ifft2, fftfreq, fftshift
+import logging
+import os
 
+
+logging.basicConfig(level=logging.DEBUG,
+                    filename="app.log",
+                    format='%(lineno)s - %(levelname)s - %(message)s',
+                    filemode='w')
+
+
+logger = logging.getLogger()
 
 class ApplicationWindow(Ui_MainWindow):
     def __init__(self,window):
@@ -25,10 +35,11 @@ class ApplicationWindow(Ui_MainWindow):
         self.comp1_box2.currentTextChanged.connect(self.mixer)
         self.comp2_box1.currentTextChanged.connect(self.mixer)
         self.comp2_box2.currentTextChanged.connect(self.mixer)
-
+        logger.info("The Application started successfully")
 
     def Importbutton(self):
-        filename = QFileDialog.getOpenFileName(None, 'Load Signal', "*.png;;")
+        logger.info("Browsing the files")
+        filename = QFileDialog.getOpenFileName(None, 'Select image', os.getenv('HOME'), "Images (*.png)")
         self.path = filename[0]
         self.Open(self.path)
 
@@ -51,7 +62,7 @@ class ApplicationWindow(Ui_MainWindow):
                 plt.imsave('input2.png',abs(self.image))
                 self.Labels[1].setPixmap(QPixmap('input2.png'))
 
-
+        logger.info("Files browsed sucsuccessfully")
 
     def select_component(self,Image_component):
             selectors=[self.image1_box,self.image2_box]
@@ -65,12 +76,15 @@ class ApplicationWindow(Ui_MainWindow):
                         #sel_comp[i]= np.real(np.fft.ifft2(sel_comp[i]))
                         sel_comp[i]= abs(sel_comp[i])
                         print(sel_comp[i])
-                        if k == 1 and 2:
+                        if k == 1 and 2 and 4:
                             sel_comp[i]= sel_comp[i]/ np.max(sel_comp[i])
+                        else:
+                            pass
                         name= 'component' + str(i) + '.png'
                         plt.imsave( name, abs(sel_comp[i])) 
                         self.Labels[i+2].setPixmap(QPixmap( name))
                         break
+            logger.info("Components have been chosen successfully")
 
                         
 
@@ -137,7 +151,7 @@ class ApplicationWindow(Ui_MainWindow):
                 # print(m1[0][0][0])
                 # print(m2[0][0][0])
               
-        for i in range(self.comp2_box2.count()):
+        for i in range(6):
             
 
             if self.comp2_box2.currentIndex()==i:
