@@ -11,6 +11,7 @@ from numpy.fft import fft2, ifft2, fftfreq, fftshift
 import logging
 import os
 
+lookup= {'Magnitude' : 0,'Phase':1,'Real':2,'Imaginary':3,'UniMagnitude':4, 'UniPhase':5 }
 
 logging.basicConfig(level=logging.DEBUG,
                     filename="app.log",
@@ -23,6 +24,8 @@ logger = logging.getLogger()
 class ApplicationWindow(Ui_MainWindow):
     def __init__(self,window):
         self.setupUi(window)
+
+       
         self.Labels = [self.image1_before,self.image2_before,self.image1_after,self.image2_after]
         self.combobox=[self.image1_box,self.image2_box]
         self.content=self.image1_box.currentText()
@@ -42,11 +45,6 @@ class ApplicationWindow(Ui_MainWindow):
         filename = QFileDialog.getOpenFileName(None, 'Select image', os.getenv('HOME'), "Images (*.png)")
         self.path = filename[0]
         self.Open(self.path)
-        #self.comp2_box2.view().setHidden(True)
-        #self.comp2_box2.view().setRowHidden(,True)
-
-        
-
 
 
     def Open(self,path):
@@ -90,52 +88,17 @@ class ApplicationWindow(Ui_MainWindow):
                         break
             logger.info("Components have been chosen successfully")
 
-                        
-
-
-            """ selected_component1 = self.image1_box.currentIndex()
-            selected_component2 = self.image2_box.currentIndex()
-
-            dis_imag1 = self.image1.Image_component[selected_component1]
-            dis_imag1 = np.real(np.fft.ifft2(dis_imag1))
-            dis_imag1 = abs(dis_imag1)
-            dis_imag1=dis_imag1/ np.max(dis_imag1)
-            dis_imag2 = np.real(np.fft.ifft2(self.image2.Image_component[selected_component2]))
-            dis_imag2 = abs(dis_imag2)
-            dis_imag2=dis_imag2/ np.max(dis_imag2) """
-            
-            """ plt.imsave('component1.png', abs(sel_comp[0])) 
-            self.Labels[2].setPixmap(QPixmap('component1.png'))
-                        
-            plt.imsave('component2.png', abs(sel_comp[1])) 
-            self.Labels[3].setPixmap(QPixmap('component2.png')) """
- 
-
     def mixer(self,Image_component):
+        out=[self.output1_img , self.output2_img]
         mixing=[self.image1,self.image2]
+        y=self.comp1_box2.currentIndex()
         ratio=[0,0]
         sliders=[self.comp1_slider,self.comp2_slider]
+        #Get ratios
         for i in range(2):
             ratio[i]= (sliders[i].value())/100
         logger.info(" Sliders changed")
     
-        
-        combo2=[['Phase','UniPhase'],['Magnitude','UniMagnitude'],['Imaginary'],['Real'],['Phase','UniPhase'],['Magnitude','UniMagnitude']]
-        lookup= {
-            'Magnitude' : 0,
-            'Phase':1,
-            'Real':2,
-            'Imaginary':3,
-            'UniMagnitude':4,
-            'UniPhase':5    
-            }
-        ## update combobox2
-        """ for i in range(6):
-            if self.comp1_box2.currentIndex()==i:
-                
-                self.comp2_box2.addItems(combo2[i])
-
-                #print(self.comp2_box2.count()) """
         ## choose mixed images
         for i in range(2):
             global mix11,mix22,mix21,mix12
@@ -157,18 +120,13 @@ class ApplicationWindow(Ui_MainWindow):
                 # print(m2[0][0][0])
         logger.info("First mixer component was selected ")        
         for i in range(6):
-            
-
             if self.comp2_box2.currentIndex()==i:
                 global x
                 x=lookup.get(self.comp2_box2.currentText())
-                
                 m3= mix21.Image_component[i]
-                m4= mix22.Image_component[i]
-                    
+                m4= mix22.Image_component[i]  
                 resmix1= (m1*ratio[0]) + (m2 *(1-ratio[0]))
                 resmix2= (m3*ratio[1]) + (m4 *(1-ratio[1])) 
-
             xx=[0,1,4,5]
             if x in xx:
                 
@@ -177,13 +135,22 @@ class ApplicationWindow(Ui_MainWindow):
                 combine= np.add(resmix1 , resmix2)    
 
             imgmix= np.real(np.fft.ifft2(combine))
-            imgmix= imgmix/ np.max(imgmix)
             
-            out=[self.output1_img , self.output2_img]
+            if (x==1 or x==4) and (y==1 or y==4):
+                imgmix= abs(imgmix)  
+            else:
+                imgmix= imgmix/ (np.max(imgmix))
+            
+            #mixed img to GUI 
+            
             for i in range(2):
                 if self.mixer_box.currentIndex()==i:
-                    plt.imsave('mixed.png', abs(imgmix) )
-                    out[i].setPixmap(QPixmap('mixed.png')) 
+                   plt.imsave('mixed.png', abs(imgmix) )
+                   out[i].setPixmap(QPixmap('mixed.png')) 
+                   print(np.max(abs(imgmix)))
+                   #print(np.min(abs(imgmix)))
+                
+                   
         logger.info("second mixer component was selected ") 
         logger.info("MIXING DONE ") 
 
