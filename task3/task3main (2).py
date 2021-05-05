@@ -89,6 +89,7 @@ class ApplicationWindow(Ui_MainWindow):
             logger.info("Components have been chosen successfully")
 
     def mixer(self,Image_component):
+        global imgmix
         out=[self.output1_img , self.output2_img]
         mixing=[self.image1,self.image2]
         y=self.comp1_box2.currentIndex()
@@ -143,13 +144,13 @@ class ApplicationWindow(Ui_MainWindow):
             
             #mixed img to GUI 
             
-            for i in range(2):
-                if self.mixer_box.currentIndex()==i:
-                   plt.imsave('mixed.png', abs(imgmix) )
-                   out[i].setPixmap(QPixmap('mixed.png')) 
-                   print(np.max(abs(imgmix)))
+        for i in range(2):
+            if self.mixer_box.currentIndex()==i:
+                plt.imsave('mixed.png', abs(imgmix) )
+                out[i].setPixmap(QPixmap('mixed.png')) 
+                print(np.max(abs(imgmix)))
                    #print(np.min(abs(imgmix)))
-                
+            logger.info("Output slot was selected ")     
                    
         logger.info("second mixer component was selected ") 
         logger.info("MIXING DONE ") 
