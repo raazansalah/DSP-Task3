@@ -42,6 +42,10 @@ class ApplicationWindow(Ui_MainWindow):
         filename = QFileDialog.getOpenFileName(None, 'Select image', os.getenv('HOME'), "Images (*.png)")
         self.path = filename[0]
         self.Open(self.path)
+        #self.comp2_box2.view().setHidden(True)
+        #self.comp2_box2.view().setRowHidden(,True)
+
+        
 
 
 
@@ -108,13 +112,14 @@ class ApplicationWindow(Ui_MainWindow):
  
 
     def mixer(self,Image_component):
-        
+        mixing=[self.image1,self.image2]
         ratio=[0,0]
         sliders=[self.comp1_slider,self.comp2_slider]
         for i in range(2):
             ratio[i]= (sliders[i].value())/100
-        #print(ratio)
-        mixing=[self.image1,self.image2]
+        logger.info(" Sliders changed")
+    
+        
         combo2=[['Phase','UniPhase'],['Magnitude','UniMagnitude'],['Imaginary'],['Real'],['Phase','UniPhase'],['Magnitude','UniMagnitude']]
         lookup= {
             'Magnitude' : 0,
@@ -127,7 +132,7 @@ class ApplicationWindow(Ui_MainWindow):
         ## update combobox2
         """ for i in range(6):
             if self.comp1_box2.currentIndex()==i:
-                self.comp2_box2.clear()
+                
                 self.comp2_box2.addItems(combo2[i])
 
                 #print(self.comp2_box2.count()) """
@@ -141,7 +146,7 @@ class ApplicationWindow(Ui_MainWindow):
             if self.comp2_box1.currentIndex()==i:
                 mix21=mixing[i]
                 mix12=mixing[i]
-                
+        logger.info("MIXED images was selected")       
         ##choose mixed components
         for i in range(6):
             global m1 ,m2 ,m3,m4,resmix1,resmix2
@@ -150,7 +155,7 @@ class ApplicationWindow(Ui_MainWindow):
                 m2= mix12.Image_component[i]
                 # print(m1[0][0][0])
                 # print(m2[0][0][0])
-              
+        logger.info("First mixer component was selected ")        
         for i in range(6):
             
 
@@ -158,8 +163,8 @@ class ApplicationWindow(Ui_MainWindow):
                 global x
                 x=lookup.get(self.comp2_box2.currentText())
                 
-                m3= mix21.Image_component[x]
-                m4= mix22.Image_component[x]
+                m3= mix21.Image_component[i]
+                m4= mix22.Image_component[i]
                     
                 resmix1= (m1*ratio[0]) + (m2 *(1-ratio[0]))
                 resmix2= (m3*ratio[1]) + (m4 *(1-ratio[1])) 
@@ -179,7 +184,9 @@ class ApplicationWindow(Ui_MainWindow):
                 if self.mixer_box.currentIndex()==i:
                     plt.imsave('mixed.png', abs(imgmix) )
                     out[i].setPixmap(QPixmap('mixed.png')) 
-        
+        logger.info("second mixer component was selected ") 
+        logger.info("MIXING DONE ") 
+
 
 class Image():
     def __init__(self,image=[]):
