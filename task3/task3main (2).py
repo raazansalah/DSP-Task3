@@ -1,7 +1,7 @@
 from task3 import Ui_MainWindow
 from PyQt5 import QtCore, QtGui, QtWidgets
 import sys
-from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QFileDialog,QMessageBox
 from PyQt5.QtGui import QPixmap
 import matplotlib.pyplot as plt
 import numpy as np
@@ -24,8 +24,8 @@ logger = logging.getLogger()
 class ApplicationWindow(Ui_MainWindow):
     def __init__(self,window):
         self.setupUi(window)
-
-       
+        self.array_of_images_class=[]
+        self.array_of_images=[]
         self.Labels = [self.image1_before,self.image2_before,self.image1_after,self.image2_after]
         self.combobox=[self.image1_box,self.image2_box]
         self.content=self.image1_box.currentText()
@@ -42,43 +42,55 @@ class ApplicationWindow(Ui_MainWindow):
 
     def Importbutton(self):
         logger.info("Browsing the files")
-        filename = QFileDialog.getOpenFileName(None, 'Select image', os.getenv('HOME'), "Images (*.png)")
-        self.path = filename[0]
-        self.Open(self.path)
+        filename = QFileDialog.getOpenFileNames(None, 'Select image', os.getenv('HOME'), "Images (*.png)")
+        if len(filename[0]) != 2:
+            # Showing number of images warning msg and return
+            self.warning_msg(
+                "Error in selected Images ", "You must select two images at once!")
+            logger.info("The user didn't select exactly 2 images")
+            return self.Importbutton()
+        self.imag1=cv2.imread(filename[0][0])
+        self.imag2=cv2.imread(filename[0][1])
+        self.array_of_images=[self.imag1,self.imag2]
+        for i in range (2):
+            self.array_of_images[i]=self.array_of_images[i]/np.max(self.array_of_images[i])
+            self.image1=Image(self.array_of_images[0])
+            self.image2=Image(self.array_of_images[1])
+            plt.imsave('input'+str(i)+'.png',abs(self.array_of_images[i]))
+            self.Labels[i].setPixmap(QPixmap('input'+str(i)+'.png'))
+        logger.info("Images browsed sucsuccessfully")
+    #def Open(self,path):
+        #self.image1=cv2.imread(filename[0][0])
+        #if self.Labels[0].pixmap() is None :
+            #self.image = cv2.imread(path)
+            #self.image = self.image/np.max(self.image)
+            #self.image1 = Image(self.image)
+            #if self.Labels[0].pixmap() is None : 
+                #plt.imsave('input1.png',abs(self.image))
+                #self.Labels[0].setPixmap(QPixmap('input1.png'))
+        #else:
+            #self.image = cv2.imread(path)
+            #self.image = self.image/np.max(self.image)
+            #self.image2 = Image(self.image)
+            #if self.Labels[1].pixmap() is None : 
+                #plt.imsave('input2.png',abs(self.image))
+                #self.Labels[1].setPixmap(QPixmap('input2.png'))
 
-
-    def Open(self,path):
-        
-        if self.Labels[0].pixmap() is None :
-            self.image = cv2.imread(path)
-            self.image = self.image/np.max(self.image)
-            self.image1 = Image(self.image)
-            if self.Labels[0].pixmap() is None : 
-                plt.imsave('input1.png',abs(self.image))
-                self.Labels[0].setPixmap(QPixmap('input1.png'))
-        else:
-            self.image = cv2.imread(path)
-            self.image = self.image/np.max(self.image)
-            self.image2 = Image(self.image)
-            if self.Labels[1].pixmap() is None : 
-                plt.imsave('input2.png',abs(self.image))
-                self.Labels[1].setPixmap(QPixmap('input2.png'))
-
-        logger.info("Files browsed sucsuccessfully")
+        #logger.info("Files browsed sucsuccessfully")
 
     def select_component(self,Image_component):
             selectors=[self.image1_box,self.image2_box]
-            images=[self.image1 ,self.image2]
-            sel_comp=[self.image1 , self.image2]
+            images=[self.image1,self.image2]
+            sel_comp=[self.image1,self.image2]
             show=[self.image1_after , self.image2_after]
             for i in range(2):
                 for k in range(1,5):
                     if selectors[i].currentIndex()==k:
+                        #sel_comp[i]= images[i].Image_component2([k-1])
                         sel_comp[i]= images[i].Image_component2[k-1]
-                        #sel_comp[i]= np.real(np.fft.ifft2(sel_comp[i]))
+                        logger.info("Components have been returned successfully")
                         sel_comp[i]= abs(sel_comp[i])
-                        print(sel_comp[i])
-                        if k == 1 and 2 and 4:
+                        if k != 3:
                             sel_comp[i]= sel_comp[i]/ np.max(sel_comp[i])
                         else:
                             pass
@@ -86,7 +98,7 @@ class ApplicationWindow(Ui_MainWindow):
                         plt.imsave( name, abs(sel_comp[i])) 
                         self.Labels[i+2].setPixmap(QPixmap( name))
                         break
-            logger.info("Components have been chosen successfully")
+            logger.info("Components have been drawn successfully")
 
     def mixer(self,Image_component):
         global imgmix
@@ -155,6 +167,12 @@ class ApplicationWindow(Ui_MainWindow):
         logger.info("second mixer component was selected ") 
         logger.info("MIXING DONE ") 
 
+    def warning_msg(self, title, text):
+        msg = QMessageBox()
+        msg.setWindowTitle(title)
+        msg.setText(text)
+        msg.setIcon(QMessageBox.Warning)
+        return msg.exec_()
 
 class Image():
     def __init__(self,image=[]):
